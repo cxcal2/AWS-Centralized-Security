@@ -1,2 +1,2 @@
-# AWS-Centrailzed-Security
+# AWS-Centralized-Security
 AWS Central Security Orchestration
