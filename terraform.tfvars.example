@@ -1,0 +1,106 @@
+# Central Firewall Manager Orchestration Configuration
+# Copy this file to terraform.tfvars and customize for your organization
+
+# Organization Configuration
+organization_name = "mycompany"
+config_bucket_name = "mycompany-central-firewall-config-2024"
+force_destroy_bucket = true  # Allow bucket deletion with objects (for testing)
+
+# Management Account Deployment
+manage_fms_admin_account = true
+cleanup_existing_config = true
+
+# Service Enablement
+enable_aws_config = true
+enable_firewall_manager = true
+
+# Account Targeting Configuration
+databricks_account_patterns = [
+  "databricks",
+  "spark", 
+  "ml",
+  "analytics",
+  "data-platform"
+]
+
+# Additional specific account exclusions
+additional_excluded_accounts = [
+  # "111111111111",  # Known Databricks account
+  # "222222222222"   # High-cost ML account
+]
+
+# Firewall Manager WAF Policy Configuration
+enable_cloudfront_waf_policy = true
+enable_alb_waf_policy = true
+enable_api_gateway_waf_policy = false
+
+# AWS Managed Rules (recommended for most organizations)
+aws_managed_rules = {
+  common_rule_set    = true   # OWASP Top 10 protection
+  known_bad_inputs   = true   # Malicious pattern detection
+  ip_reputation      = true   # Known bad IP blocking
+  sql_injection      = true   # SQL injection protection
+  linux_rule_set     = false # Enable for Linux applications
+  windows_rule_set   = false # Enable for Windows applications
+  php_rule_set       = false # Enable for PHP applications
+  wordpress_rule_set = false # Enable for WordPress sites
+}
+
+# Custom Rules Configuration
+custom_rules = {
+  rate_limiting = {
+    enabled   = true
+    threshold = 2000      # requests per 5 minutes per IP
+    action    = "BLOCK"   # BLOCK or COUNT
+  }
+  
+  geo_blocking = {
+    enabled   = false
+    countries = []        # Add country codes like ["CN", "RU", "KP"]
+    action    = "BLOCK"
+  }
+  
+  ip_whitelist = {
+    enabled = false
+    ips     = []          # Add trusted CIDR blocks
+  }
+  
+  custom_patterns = {
+    enabled  = false
+    patterns = []         # Add custom pattern rules
+  }
+}
+
+# Policy Configuration
+enable_automatic_remediation = true
+override_customer_waf_association = false
+
+# Monitoring Configuration
+enable_orchestration_monitoring = true
+enable_compliance_alarms = true
+enable_waf_logging = true
+log_retention_days = 30
+
+# Notification Configuration
+create_compliance_sns_topic = false
+compliance_notification_emails = [
+  # "security-team@company.com",
+  # "compliance-team@company.com"
+]
+
+# AWS Config Resource Types
+firewall_manager_resource_types = [
+  "AWS::CloudFront::Distribution",
+  "AWS::ElasticLoadBalancingV2::LoadBalancer",
+  "AWS::ApiGateway::Stage",
+  "AWS::EC2::SecurityGroup"
+]
+include_global_resources = true
+
+# Tags
+tags = {
+  Environment = "Security"
+  Team        = "SecurityTeam"
+  Purpose     = "CentralFirewallOrchestration"
+  ManagedBy   = "Terraform"
+}
